@@ -1,0 +1,210 @@
+{
+  "$schema": "https://cleanlink.app/rules.schema.json",
+  "version": "2.0.0",
+  "updated_at": "2025-04-01T00:00:00Z",
+  "global_rules": [
+    {
+      "name": "Standard UTM",
+      "regex": "[?&]utm_[a-z_]+=(?:[^&=#]*)",
+      "comment": "Removes all utm_ prefixed parameters (utm_source, utm_medium, utm_campaign, utm_term, utm_content)"
+    },
+    {
+      "name": "Google Click ID",
+      "regex": "[?&]gclid=[^&]*",
+      "comment": "Google Ads click identifier"
+    },
+    {
+      "name": "Facebook Click ID",
+      "regex": "[?&]fbclid=[^&]*",
+      "comment": "Facebook/Meta click identifier"
+    },
+    {
+      "name": "Microsoft Click ID",
+      "regex": "[?&]msclkid=[^&]*",
+      "comment": "Microsoft Ads click identifier"
+    },
+    {
+      "name": "Google Analytics Client ID",
+      "regex": "[?&]_ga(?:=[^&]*)?",
+      "comment": "GA4 cross-domain linker parameter"
+    },
+    {
+      "name": "Yandex Click ID",
+      "regex": "[?&]yclid=[^&]*",
+      "comment": "Yandex click identifier"
+    },
+    {
+      "name": "Adobe Analytics",
+      "regex": "[?&]s_cid=[^&]*",
+      "comment": "Adobe Analytics campaign ID"
+    },
+    {
+      "name": "HubSpot",
+      "regex": "[?&]hsa_(?:cam|grp|mt|net|src|tgt|ad|acc|kw|ver)=[^&]*",
+      "comment": "HubSpot analytics parameters"
+    },
+    {
+      "name": "MailChimp",
+      "regex": "[?&]mc_(?:cid|eid)=[^&]*",
+      "comment": "MailChimp tracking parameters"
+    },
+    {
+      "name": "Klaviyo",
+      "regex": "[?&]_kx=[^&]*",
+      "comment": "Klaviyo email tracking"
+    },
+    {
+      "name": "Drip",
+      "regex": "[?&]__s=[^&]*",
+      "comment": "Drip email tracking"
+    },
+    {
+      "name": "Vero",
+      "regex": "[?&]vero_(?:conv|id)=[^&]*"
+    },
+    {
+      "name": "LinkedIn Insight",
+      "regex": "[?&]li_fat_id=[^&]*",
+      "comment": "LinkedIn first-party ad tracking"
+    },
+    {
+      "name": "Twitter/X Click ID",
+      "regex": "[?&]twclid=[^&]*"
+    },
+    {
+      "name": "Pinterest Click ID",
+      "regex": "[?&]epik=[^&]*"
+    },
+    {
+      "name": "TikTok Click ID",
+      "regex": "[?&]ttclid=[^&]*"
+    },
+    {
+      "name": "Snapchat Click ID",
+      "regex": "[?&]ScCid=[^&]*"
+    },
+    {
+      "name": "Outbrain Click ID",
+      "regex": "[?&]obOrigUrl=[^&]*"
+    },
+    {
+      "name": "irclickid (Impact Radius)",
+      "regex": "[?&]irclickid=[^&]*"
+    }
+  ],
+  "domain_rules": [
+    {
+      "domain_pattern": "^(?:.*\\.)?amazon\\.(?:com|co\\.uk|de|fr|co\\.jp|ca|com\\.au|it|es|nl|se|pl|com\\.br|com\\.mx)$",
+      "rules": [
+        {
+          "name": "Amazon referral tag",
+          "regex": "[?&](?:ref|tag|linkCode|linkId|ascsubtag)=[^&]*"
+        },
+        {
+          "name": "Amazon internal analytics",
+          "regex": "[?&](?:pf_rd_[a-z]|pd_rd_[a-z]|qid|sr|__mk_[a-z_]+)=[^&]*"
+        },
+        {
+          "name": "Amazon session ID",
+          "regex": "[?&]field-keywords=[^&]*"
+        }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?ebay\\.(?:com|co\\.uk|de|com\\.au|fr|it|es|com\\.sg)$",
+      "rules": [
+        { "name": "eBay tracking params", "regex": "[?&]_trkparms=[^&]*" },
+        { "name": "eBay amdata", "regex": "[?&]amdata=[^&]*" },
+        { "name": "eBay hash", "regex": "[?&]hash=[^&]*" },
+        { "name": "eBay source", "regex": "[?&]_from=[^&]*" }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?youtube\\.com$",
+      "rules": [
+        { "name": "YouTube feature", "regex": "[?&]feature=[^&]*" },
+        { "name": "YouTube PP", "regex": "[?&]pp=[^&]*" },
+        { "name": "YouTube si", "regex": "[?&]si=[^&]*", "comment": "YouTube tracking param added since late 2023" }
+      ]
+    },
+    {
+      "domain_pattern": "^youtu\\.be$",
+      "rules": [
+        { "name": "YouTube short si", "regex": "[?&]si=[^&]*" },
+        { "name": "YouTube short feature", "regex": "[?&]feature=[^&]*" }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?twitter\\.com$|^(?:.*\\.)?x\\.com$",
+      "rules": [
+        { "name": "Twitter src", "regex": "[?&]src=[^&]*" },
+        { "name": "Twitter ref_src", "regex": "[?&]ref_src=[^&]*" },
+        { "name": "Twitter ref_url", "regex": "[?&]ref_url=[^&]*" },
+        { "name": "Twitter s", "regex": "[?&]s=[^&]*" },
+        { "name": "Twitter t", "regex": "[?&]t=[^&]*" }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?reddit\\.com$",
+      "rules": [
+        { "name": "Reddit share id", "regex": "[?&]share_id=[^&]*" },
+        { "name": "Reddit ref_source", "regex": "[?&]ref_source=[^&]*" },
+        { "name": "Reddit ref", "regex": "[?&]ref=[^&]*" }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?instagram\\.com$",
+      "rules": [
+        { "name": "Instagram igshid", "regex": "[?&]igshid=[^&]*" },
+        { "name": "Instagram igsh", "regex": "[?&]igsh=[^&]*" }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?linkedin\\.com$",
+      "rules": [
+        { "name": "LinkedIn tracking", "regex": "[?&]trackingId=[^&]*" },
+        { "name": "LinkedIn refId", "regex": "[?&]refId=[^&]*" },
+        { "name": "LinkedIn lipi", "regex": "[?&]lipi=[^&]*" }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?facebook\\.com$",
+      "rules": [
+        { "name": "Facebook story fbid", "regex": "[?&]story_fbid=[^&]*" },
+        { "name": "Facebook id", "regex": "[?&]__cft__\\[[0-9]+\\]=[^&]*" },
+        { "name": "Facebook tn", "regex": "[?&]__tn__=[^&]*" }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?walmart\\.com$",
+      "rules": [
+        { "name": "Walmart source", "regex": "[?&]wmlspartner=[^&]*" },
+        { "name": "Walmart affil", "regex": "[?&]affiliates_id=[^&]*" },
+        { "name": "Walmart vid", "regex": "[?&]veh=[^&]*" }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?bestbuy\\.com$",
+      "rules": [
+        { "name": "BestBuy source", "regex": "[?&]ref=[^&]*" },
+        { "name": "BestBuy loc", "regex": "[?&]loc=[^&]*" },
+        { "name": "BestBuy acampID", "regex": "[?&]acampID=[^&]*" }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?etsy\\.com$",
+      "rules": [
+        { "name": "Etsy ref", "regex": "[?&]ref=[^&]*" },
+        { "name": "Etsy click_key", "regex": "[?&]click_key=[^&]*" },
+        { "name": "Etsy click_sum", "regex": "[?&]click_sum=[^&]*" },
+        { "name": "Etsy ga", "regex": "[?&]ga_(?:order|search)[^&]*" }
+      ]
+    },
+    {
+      "domain_pattern": "^(?:.*\\.)?github\\.com$",
+      "rules": [
+        { "name": "GitHub notification referrer", "regex": "[?&]notification_referrer_id=[^&]*" }
+      ]
+    }
+  ]
+}
