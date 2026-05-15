@@ -1,6 +1,6 @@
-# Contributing to CleanLink Rules
+# Contributing to Link Clean Rules
 
-Thank you for helping keep CleanLink's tracking-parameter database up to date!
+Thank you for helping keep Link Clean's tracking-parameter database up to date!
 
 ## Quick Start
 

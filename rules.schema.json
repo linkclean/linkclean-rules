@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://cleanlink.app/rules.schema.json",
-  "title": "CleanLink Rules Schema v2.0",
-  "description": "Schema for CleanLink's rules.json tracking-parameter removal ruleset",
+  "$id": "https://linkclean.app/rules.schema.json",
+  "title": "Link Clean Rules Schema v2.0",
+  "description": "Schema for Link Clean's rules.json tracking-parameter removal ruleset",
   "type": "object",
   "required": ["version", "global_rules", "domain_rules"],
   "additionalProperties": false,
