@@ -1,0 +1,89 @@
+name: Rule-suggestion IssueOps Bot
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  process:
+    if: contains(github.event.issue.labels.*.name, 'rule-suggestion')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout rules repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch linkclean bot actions
+        uses: actions/checkout@v4
+        with:
+          repository: linkclean/linkclean
+          token: ${{ secrets.LINKCLEAN_PAT }}
+          ref: ${{ vars.LINKCLEAN_REF }}
+          path: _linkclean
+          sparse-checkout: |
+            .github/actions
+            scripts
+            src/core
+          sparse-checkout-cone-mode: true
+
+      - name: Run IssueOps bot
+        id: bot
+        uses: ./_linkclean/.github/actions/rule-bot
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          issue-body: ${{ github.event.issue.body }}
+          issue-author: ${{ github.event.issue.user.login }}
+          issue-labels: ${{ join(github.event.issue.labels.*.name, ',') }}
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          gh-repository: ${{ github.repository }}
+          rules-file: ${{ github.workspace }}/rules.json
+          spam-domains-file: ${{ github.workspace }}/.github/contrib/spam-domains.txt
+          llm-endpoint: ${{ secrets.RULES_BOT_LLM_ENDPOINT }}
+          llm-key: ${{ secrets.RULES_BOT_LLM_KEY }}
+          llm-model: ${{ secrets.RULES_BOT_LLM_MODEL }}
+
+      - name: Apply labels + comment + create PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESULT: ${{ steps.bot.outputs.result }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          echo "$RESULT" > /tmp/bot-output.json
+          ACTION=$(jq -r '.action' /tmp/bot-output.json)
+          REASON=$(jq -r '.reason // empty' /tmp/bot-output.json)
+          LABELS=$(jq -r '.labels[]?' /tmp/bot-output.json | paste -sd',' -)
+
+          if [ -n "$LABELS" ]; then
+            gh issue edit "$ISSUE_NUMBER" --repo "$GH_REPO" --add-label "$LABELS" || true
+          fi
+
+          case "$ACTION" in
+            spam|needs-detail|needs-confirm|duplicate|error|queued)
+              gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" \
+                --body "🤖 Bot: **${ACTION}** — ${REASON}"
+              ;;
+            drafted)
+              BRANCH=$(jq -r '.prBranch' /tmp/bot-output.json)
+              TITLE=$(jq -r '.prTitle' /tmp/bot-output.json)
+              NEWVER=$(jq -r '.newVersion' /tmp/bot-output.json)
+              LLM=$(jq -r '.llmComment // empty' /tmp/bot-output.json)
+              git config user.name "linkclean-bot"
+              git config user.email "noreply@users.noreply.github.com"
+              git checkout -b "$BRANCH"
+              git add rules.json
+              git commit -m "rules: $TITLE (from #$ISSUE_NUMBER)"
+              git push -u origin "$BRANCH"
+              BODY="Drafted from #${ISSUE_NUMBER}. New version: ${NEWVER}.\n\nReview the diff carefully before merging.\n\n${LLM}"
+              gh pr create --repo "$GH_REPO" --base main --head "$BRANCH" \
+                --title "$TITLE" --body "$BODY" --draft \
+                --label contrib --label unreviewed
+              ;;
+          esac

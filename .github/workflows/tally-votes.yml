@@ -1,0 +1,34 @@
+name: Tally Rule-suggestion Votes
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  tally:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch linkclean bot actions
+        uses: actions/checkout@v4
+        with:
+          repository: linkclean/linkclean
+          token: ${{ secrets.LINKCLEAN_PAT }}
+          ref: ${{ vars.LINKCLEAN_REF }}
+          path: _linkclean
+          sparse-checkout: |
+            .github/actions
+            scripts
+            src/core
+          sparse-checkout-cone-mode: true
+
+      - uses: ./_linkclean/.github/actions/tally-votes
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          gh-repository: ${{ github.repository }}
+          promote-threshold: '5'

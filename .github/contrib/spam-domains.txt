@@ -1,0 +1,4 @@
+# Domains the IssueOps bot will auto-label as `spam`. One per line.
+# Lines starting with `#` are comments. Matching is case-insensitive
+# and applied to the `domain` field of the issue form (exact match
+# only — no wildcards).

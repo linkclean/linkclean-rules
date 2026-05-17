@@ -1,0 +1,79 @@
+name: Suggest a tracking-parameter rule
+description: Report a URL that still has tracking after Link Clean ran, or propose a new rule.
+title: "[rule] <domain>: <param>"
+labels: [rule-suggestion, unreviewed]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Link Clean's tracking-parameter rules!
+        - Please redact any personal data from the URLs before submitting.
+        - All submissions are released under CC0.
+  - type: input
+    id: domain
+    attributes:
+      label: Domain
+      description: e.g. example.com
+      placeholder: example.com
+    validations:
+      required: true
+  - type: input
+    id: original_url
+    attributes:
+      label: Original URL (auto-redacted)
+      description: The URL that still has tracking parameters.
+    validations:
+      required: true
+  - type: input
+    id: expected_url
+    attributes:
+      label: Expected URL after cleaning
+      description: What the URL should look like after Link Clean processes it.
+    validations:
+      required: true
+  - type: input
+    id: param_names
+    attributes:
+      label: Tracking parameter name(s), comma-separated
+      description: e.g. utm_source, gclid
+      placeholder: utm_source, gclid
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_regex
+    attributes:
+      label: Proposed regex (optional)
+      description: |
+        Optional JS-compatible regex applied with /gi. Leave blank for the
+        IssueOps bot to synthesize from the param names.
+  - type: textarea
+    id: proposed_redirection_regex
+    attributes:
+      label: Proposed redirection regex (optional)
+      description: For redirect-style trackers. Must contain a single capture group with the URL-encoded target.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - ''
+        - utm
+        - click_id
+        - session
+        - fingerprint
+        - referral
+        - redirect_param
+        - other
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I redacted PII from the URLs I am about to submit.
+          required: true
+        - label: This submission is released under CC0.
+          required: true

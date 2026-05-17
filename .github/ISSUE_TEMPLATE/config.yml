@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Link Clean app discussions
+    url: https://github.com/your-org/linkclean-rules/discussions
+    about: Ask questions or propose ideas before opening an issue.
