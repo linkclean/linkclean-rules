@@ -1,0 +1,5 @@
+{
+  "_comment": "LinkClean-authored rules. Never overwritten by seed-clearurls-rules.ts. Add rules here that should survive ClearURLs re-seeding.",
+  "global_rules": [],
+  "domain_rules": []
+}
