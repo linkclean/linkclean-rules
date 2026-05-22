@@ -4,6 +4,9 @@ on:
   issues:
     types: [opened, edited, labeled]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: write
   issues: write
@@ -12,15 +15,15 @@ permissions:
 jobs:
   process:
     if: contains(github.event.issue.labels.*.name, 'rule-suggestion')
-    runs-on: ${{ fromJSON(vars.RUNNER_LABELS || '["ubuntu-latest"]') }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout rules repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Fetch linkclean bot actions
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: linkclean/linkclean
           token: ${{ secrets.LINKCLEAN_PAT }}
@@ -82,7 +85,7 @@ jobs:
               git commit -m "rules: $TITLE (from #$ISSUE_NUMBER)"
               git push -u origin "$BRANCH"
               BODY="Drafted from #${ISSUE_NUMBER}. New version: ${NEWVER}.\n\nReview the diff carefully before merging.\n\n${LLM}"
-              gh pr create --repo "$GH_REPO" --base main --head "$BRANCH" \
+              gh pr create --repo "$GH_REPO" --base master --head "$BRANCH" \
                 --title "$TITLE" --body "$BODY" --draft \
                 --label contrib --label unreviewed
               ;;
