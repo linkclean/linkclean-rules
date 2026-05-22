@@ -4,15 +4,32 @@ on:
   issues:
     types: [opened, edited, labeled]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: write
   issues: write
   pull-requests: write
 
 jobs:
+  check-runner:
+    name: Resolve runner
+    runs-on: ubuntu-latest
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check runner availability
+        id: check
+        uses: pinnacledigital/github-runner/.github/actions/runner-check@master
+        with:
+          labels: ${{ vars.RUNNER_LABELS || '["ubuntu-latest"]' }}
+          token: ${{ secrets.RUNNER_API_TOKEN || github.token }}
+
   process:
+    needs: check-runner
     if: contains(github.event.issue.labels.*.name, 'rule-suggestion')
-    runs-on: ${{ fromJSON(vars.RUNNER_LABELS || '["ubuntu-latest"]') }}
+    runs-on: ${{ fromJSON(needs.check-runner.outputs.runner) }}
     steps:
       - name: Checkout rules repo
         uses: actions/checkout@v4
@@ -82,7 +99,7 @@ jobs:
               git commit -m "rules: $TITLE (from #$ISSUE_NUMBER)"
               git push -u origin "$BRANCH"
               BODY="Drafted from #${ISSUE_NUMBER}. New version: ${NEWVER}.\n\nReview the diff carefully before merging.\n\n${LLM}"
-              gh pr create --repo "$GH_REPO" --base main --head "$BRANCH" \
+              gh pr create --repo "$GH_REPO" --base master --head "$BRANCH" \
                 --title "$TITLE" --body "$BODY" --draft \
                 --label contrib --label unreviewed
               ;;

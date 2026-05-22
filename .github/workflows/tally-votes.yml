@@ -5,12 +5,29 @@ on:
     - cron: '*/15 * * * *'
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   issues: write
 
 jobs:
+  check-runner:
+    name: Resolve runner
+    runs-on: ubuntu-latest
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check runner availability
+        id: check
+        uses: pinnacledigital/github-runner/.github/actions/runner-check@master
+        with:
+          labels: ${{ vars.RUNNER_LABELS || '["ubuntu-latest"]' }}
+          token: ${{ secrets.RUNNER_API_TOKEN || github.token }}
+
   tally:
-    runs-on: ${{ fromJSON(vars.RUNNER_LABELS || '["ubuntu-latest"]') }}
+    needs: check-runner
+    runs-on: ${{ fromJSON(needs.check-runner.outputs.runner) }}
     steps:
       - uses: actions/checkout@v4
 
