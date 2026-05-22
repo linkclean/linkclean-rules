@@ -1,0 +1,134 @@
+name: Test Runner Resolve Action
+
+on:
+  workflow_dispatch:
+    inputs:
+      labels:
+        description: 'Preferred runner labels (JSON array string)'
+        required: false
+        default: '["self-hosted","android"]'
+      fallback:
+        description: 'Fallback labels (JSON array string)'
+        required: false
+        default: '["ubuntu-latest"]'
+
+jobs:
+  check-runner:
+    runs-on: ubuntu-latest
+    outputs:
+      runner: ${{ steps.resolve.outputs.runner }}
+
+    steps:
+      # ── 1. Show which identity each token authenticates as ──────────────────
+      - name: Debug — identity (github.token)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "=== github.token identity ==="
+          gh api /user --jq '"login: " + .login' 2>&1 || echo "(failed — expected for GITHUB_TOKEN bot)"
+          echo "=== token scopes header ==="
+          gh api /user -i 2>&1 | grep -i 'x-oauth-scopes' || echo "(no scopes header)"
+
+      - name: Debug — identity (ORG_RUNNER_PAT)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.ORG_RUNNER_PAT }}
+        run: |
+          echo "=== ORG_RUNNER_PAT identity ==="
+          gh api /user --jq '"login: " + .login' 2>&1 || echo "(failed — PAT not configured)"
+          echo "=== token scopes header ==="
+          gh api /user -i 2>&1 | grep -i 'x-oauth-scopes' || echo "(no scopes header)"
+
+      # ── 2. Raw runners API — try every meaningful combination ──────────────
+      - name: Debug — org runners API (github.token)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ORG="${GITHUB_REPOSITORY%%/*}"
+          echo "=== GET /orgs/${ORG}/actions/runners  [github.token] ==="
+          RESP=$(gh api "/orgs/${ORG}/actions/runners" 2>&1) && echo "$RESP" | jq '.' \
+            || echo "ERROR: $RESP"
+
+      - name: Debug — org runners API (ORG_RUNNER_PAT)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.ORG_RUNNER_PAT }}
+        run: |
+          ORG="${GITHUB_REPOSITORY%%/*}"
+          echo "=== GET /orgs/${ORG}/actions/runners  [ORG_RUNNER_PAT] ==="
+          RESP=$(gh api "/orgs/${ORG}/actions/runners" 2>&1) && echo "$RESP" | jq '.' \
+            || echo "ERROR: $RESP"
+
+      - name: Debug — repo runners API (github.token)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "=== GET /repos/${GITHUB_REPOSITORY}/actions/runners  [github.token] ==="
+          RESP=$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runners" 2>&1) && echo "$RESP" | jq '.' \
+            || echo "ERROR: $RESP"
+
+      - name: Debug — repo runners API (ORG_RUNNER_PAT)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.ORG_RUNNER_PAT }}
+        run: |
+          echo "=== GET /repos/${GITHUB_REPOSITORY}/actions/runners  [ORG_RUNNER_PAT] ==="
+          RESP=$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runners" 2>&1) && echo "$RESP" | jq '.' \
+            || echo "ERROR: $RESP"
+
+      # ── 3. Invoke the action under test ────────────────────────────────────
+      # pinnacledigital/github-runner@master inputs:
+      #   labels   – required  – JSON array of preferred runner labels
+      #   fallback – optional  – JSON array when no match (default: ["ubuntu-latest"])
+      #   token    – optional  – defaults to github.token; pass a classic PAT
+      #                          with admin:org scope to see org-level runners
+      - name: Resolve runner (with ORG_RUNNER_PAT)
+        id: resolve
+        uses: pinnacledigital/github-runner@master
+        with:
+          labels: ${{ inputs.labels }}
+          fallback: ${{ inputs.fallback }}
+          token: ${{ secrets.ORG_RUNNER_PAT }}
+
+      - name: Debug — resolved output
+        run: |
+          RESOLVED='${{ steps.resolve.outputs.runner }}'
+          REQUESTED='${{ inputs.labels }}'
+          FALLBACK='${{ inputs.fallback }}'
+          echo "=== Inputs ==="
+          echo "  requested: $REQUESTED"
+          echo "  fallback:  $FALLBACK"
+          echo ""
+          echo "=== Resolved: $RESOLVED ==="
+          echo ""
+          if [ "$RESOLVED" = "$REQUESTED" ]; then
+            echo "DETECTION: PASS — self-hosted runner detected and selected"
+          elif [ "$RESOLVED" = "$FALLBACK" ]; then
+            echo "DETECTION: FAIL — no matching runner found, fell back to $FALLBACK"
+          else
+            echo "DETECTION: UNEXPECTED — resolved to $RESOLVED (neither requested nor fallback)"
+          fi
+
+  # ── 4. Spin up a job on the resolved runner to confirm selection ───────────
+  use-runner:
+    needs: check-runner
+    runs-on: ${{ fromJSON(needs.check-runner.outputs.runner) }}
+    steps:
+      - name: Debug — confirm runner environment
+        run: |
+          RESOLVED='${{ needs.check-runner.outputs.runner }}'
+          REQUESTED='${{ inputs.labels }}'
+          echo "=== Selected via labels: $RESOLVED ==="
+          echo "=== Runner name:         $RUNNER_NAME ==="
+          echo "=== Runner OS:           $RUNNER_OS ==="
+          echo "=== Architecture:        $(uname -m) ==="
+          uname -a
+          echo ""
+          if [[ "$RUNNER_NAME" == "amd64-linkclean-1" ]]; then
+            echo "RESULT: PASS — landed on self-hosted runner '$RUNNER_NAME' using labels $RESOLVED"
+          else
+            echo "RESULT: FAIL — landed on '$RUNNER_NAME' using labels $RESOLVED (requested: $REQUESTED)"
+          fi
