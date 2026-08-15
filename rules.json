@@ -888,6 +888,11 @@
           "category": "other"
         },
         {
+          "name": "is",
+          "param_name": "is",
+          "category": "other"
+        },
+        {
           "name": "pp",
           "param_name": "pp",
           "category": "other"
