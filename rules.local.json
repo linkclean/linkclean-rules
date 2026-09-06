@@ -22,6 +22,21 @@
           "category": "cdn_transform"
         }
       ]
+    },
+    {
+      "domain_pattern": "^https?:\\/\\/(?:[a-z0-9-]+\\.)*?amazon(?:\\.[a-z]{2,}){1,}",
+      "rules": [
+        {
+          "name": "rsd",
+          "param_name": "rsd",
+          "category": "referral"
+        },
+        {
+          "name": "edk",
+          "param_name": "edk",
+          "category": "referral"
+        }
+      ]
     }
   ]
 }
