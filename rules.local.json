@@ -1,5 +1,27 @@
 {
   "_comment": "LinkClean-authored rules. Never overwritten by seed-clearurls-rules.ts. Add rules here that should survive ClearURLs re-seeding.",
   "global_rules": [],
-  "domain_rules": []
+  "domain_rules": [
+    {
+      "domain_pattern": "^https?:\\/\\/(?:[a-z0-9-]+\\.)*?google(?:\\.[a-z]{2,}){1,}\\/imgres",
+      "redirections": [
+        "^https?:\\/\\/(?:[a-z0-9-]+\\.)*?google(?:\\.[a-z]{2,}){1,}\\/imgres\\?.*?imgurl=([^&]+)"
+      ]
+    },
+    {
+      "domain_pattern": "^https?:\\/\\/(?:[a-z0-9-]+\\.)*?hearstapps\\.com",
+      "rules": [
+        {
+          "name": "crop",
+          "param_name": "crop",
+          "category": "cdn_transform"
+        },
+        {
+          "name": "resize",
+          "param_name": "resize",
+          "category": "cdn_transform"
+        }
+      ]
+    }
+  ]
 }

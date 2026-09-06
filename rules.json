@@ -1,7 +1,7 @@
 {
   "schema_version": "2.1",
-  "version": "2.1.0",
-  "updated_at": "2026-05-21T08:10:44.897Z",
+  "version": "2.1.3",
+  "updated_at": "2026-09-06T00:10:00.000Z",
   "min_app_version": "1.0.0",
   "global_rules": [
     {
@@ -4836,6 +4836,27 @@
           "name": "_ss",
           "param_name": "_ss",
           "category": "other"
+        }
+      ]
+    },
+    {
+      "domain_pattern": "^https?:\\/\\/(?:[a-z0-9-]+\\.)*?google(?:\\.[a-z]{2,}){1,}\\/imgres",
+      "redirections": [
+        "^https?:\\/\\/(?:[a-z0-9-]+\\.)*?google(?:\\.[a-z]{2,}){1,}\\/imgres\\?.*?imgurl=([^&]+)"
+      ]
+    },
+    {
+      "domain_pattern": "^https?:\\/\\/(?:[a-z0-9-]+\\.)*?hearstapps\\.com",
+      "rules": [
+        {
+          "name": "crop",
+          "param_name": "crop",
+          "category": "cdn_transform"
+        },
+        {
+          "name": "resize",
+          "param_name": "resize",
+          "category": "cdn_transform"
         }
       ]
     }
